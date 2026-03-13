@@ -6,20 +6,22 @@
  *  • AudioAnalyzer (Web Audio API)
  *  • 5 visualizer modes: Spectrum · WaveRibbon · Particles · Globe · Tunnel
  *  • Charts3D (bar / scatter / line / surface)
- *  • Builder3D (primitive objects)
- *  • Exporter (PNG + GIF)
+ *  • Builder3D (primitive objects + prefab structures + sectors)
+ *  • WorldNavigator (first-person walk mode)
+ *  • Exporter (PNG + GIF with configurable duration)
  *  • MiniCanvases (sidebar waveform / freq display)
  *  • All UI controls
  */
 
-import { SceneManager }  from './scene.js';
-import { AudioAnalyzer } from './audioAnalyzer.js';
-import { Spectrum3D }    from './visualizers/spectrum3D.js';
-import { WaveRibbon3D }  from './visualizers/waveform3D.js';
-import { Particles3D }   from './visualizers/particles.js';
-import { Globe3D }       from './visualizers/globe3D.js';
-import { Tunnel3D }      from './visualizers/tunnel3D.js';
-import { Builder3D }     from './builder3D.js';
+import { SceneManager }    from './scene.js';
+import { AudioAnalyzer }   from './audioAnalyzer.js';
+import { Spectrum3D }      from './visualizers/spectrum3D.js';
+import { WaveRibbon3D }    from './visualizers/waveform3D.js';
+import { Particles3D }     from './visualizers/particles.js';
+import { Globe3D }         from './visualizers/globe3D.js';
+import { Tunnel3D }        from './visualizers/tunnel3D.js';
+import { Builder3D }       from './builder3D.js';
+import { WorldNavigator }  from './worldNavigator.js';
 import {
   generateDataset,
   BarChart3D,
@@ -27,8 +29,8 @@ import {
   LineChart3D,
   SurfaceChart3D
 } from './charts/charts3D.js';
-import { Exporter }      from './export/exporter.js';
-import { MiniCanvases }  from './ui/miniCanvases.js';
+import { Exporter }        from './export/exporter.js';
+import { MiniCanvases }    from './ui/miniCanvases.js';
 
 /* ════════════════════════════════════════════
    Bootstrap
@@ -67,6 +69,9 @@ setVizMode('spectrum');
 const builder = new Builder3D(scene);
 builder.setGrid(false); // hidden until Build mode
 
+/* ── World navigator (walk mode) ── */
+const navigator = new WorldNavigator(scene.camera, scene.renderer, scene.controls);
+
 /* ── Active chart ── */
 let activeChart = null;
 
@@ -97,6 +102,9 @@ scene.addAnimCallback((delta, elapsed) => {
 
   // Live stats
   updateStats(freqData, timeData);
+
+  // Walk mode update
+  navigator.update(delta);
 });
 
 /* ════════════════════════════════════════════
@@ -344,7 +352,7 @@ document.getElementById('buildChartBtn').addEventListener('click', () => {
 });
 
 /* ════════════════════════════════════════════
-   Builder controls
+   Builder controls – primitives
 ════════════════════════════════════════════ */
 document.getElementById('primitiveScale').addEventListener('input', e => {
   document.getElementById('primitiveScaleVal').textContent = parseFloat(e.target.value).toFixed(1);
@@ -357,8 +365,72 @@ document.getElementById('addPrimitiveBtn').addEventListener('click', () => {
   builder.addPrimitive(type, color, scale);
 });
 
+/* ── Structures ── */
+document.getElementById('structureScale').addEventListener('input', e => {
+  document.getElementById('structureScaleVal').textContent = parseFloat(e.target.value).toFixed(1);
+});
+
+document.getElementById('snapToGrid').addEventListener('change', e => {
+  builder.snapToGrid = e.target.checked;
+});
+
+document.getElementById('addStructureBtn').addEventListener('click', () => {
+  const type  = document.getElementById('structureType').value;
+  const color = document.getElementById('structureColor').value;
+  const scale = parseFloat(document.getElementById('structureScale').value);
+  builder.addStructure(type, color, scale);
+});
+
+/* ── Sector management ── */
+const activeSectorSelect = document.getElementById('activeSector');
+
+document.getElementById('addSectorBtn').addEventListener('click', () => {
+  const name  = document.getElementById('sectorName').value.trim();
+  const color = document.getElementById('sectorColor').value;
+  if (!name) { alert('Please enter a sector name.'); return; }
+
+  const sector = builder.addSector(name, color);
+  renderSectorList();
+
+  // Auto-select new sector
+  activeSectorSelect.value = name;
+  builder.setActiveSector(name);
+});
+
+activeSectorSelect.addEventListener('change', e => {
+  builder.setActiveSector(e.target.value || null);
+});
+
+function renderSectorList () {
+  const sectors  = builder.getSectors();
+  const list     = document.getElementById('sectorList');
+
+  // Rebuild <select> options
+  activeSectorSelect.innerHTML = '<option value="">— None (loose) —</option>';
+  sectors.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value       = s.name;
+    opt.textContent = s.name;
+    activeSectorSelect.appendChild(opt);
+  });
+
+  // Rebuild badge list
+  list.innerHTML = '';
+  sectors.forEach(s => {
+    const badge = document.createElement('span');
+    badge.className   = 'sector-badge';
+    badge.textContent = `${s.name} (${s.objects.length})`;
+    badge.style.borderColor = s.color;
+    badge.style.color       = s.color;
+    badge.title = `${s.objects.length} object(s) in sector "${s.name}"`;
+    list.appendChild(badge);
+  });
+}
+
+/* ── Scene management ── */
 document.getElementById('clearSceneBtn').addEventListener('click', () => {
   builder.clearObjects();
+  renderSectorList();
 });
 
 document.getElementById('bgPreset').addEventListener('change', e => {
@@ -384,25 +456,83 @@ document.getElementById('exportSceneBtn').addEventListener('click', () => {
 });
 
 /* ════════════════════════════════════════════
+   Walk Mode
+════════════════════════════════════════════ */
+const walkModeBtn    = document.getElementById('walkModeBtn');
+const walkIndicator  = document.getElementById('walkIndicator');
+const walkHint       = document.getElementById('walkHint');
+const autoRotateChk  = document.getElementById('autoRotate');
+
+walkModeBtn.addEventListener('click', () => {
+  if (navigator.active) {
+    navigator.deactivate();
+    exitWalkMode();
+  } else {
+    navigator.activate();
+    enterWalkMode();
+  }
+});
+
+function enterWalkMode () {
+  walkModeBtn.textContent = '🛑 Exit Walk Mode';
+  walkModeBtn.classList.add('active');
+  walkIndicator.classList.remove('hidden');
+  walkHint.classList.remove('hidden');
+  // Pause auto-rotate while walking
+  scene.controls.autoRotate = false;
+  autoRotateChk.checked     = false;
+}
+
+function exitWalkMode () {
+  walkModeBtn.textContent = '🚶 Walk Mode';
+  walkModeBtn.classList.remove('active');
+  walkIndicator.classList.add('hidden');
+  walkHint.classList.add('hidden');
+}
+
+// Auto-exit walk mode when pointer lock is released
+document.addEventListener('pointerlockchange', () => {
+  if (!document.pointerLockElement && navigator.active) {
+    navigator.deactivate();
+    exitWalkMode();
+  }
+});
+
+/* ════════════════════════════════════════════
    Export controls
 ════════════════════════════════════════════ */
 document.getElementById('exportPngBtn').addEventListener('click', () => {
   exporter.exportPNG();
 });
 
-const gifBtn      = document.getElementById('exportGifBtn');
+const gifBtn       = document.getElementById('exportGifBtn');
 const gifIndicator = document.getElementById('gifIndicator');
+const gifCountdown = document.getElementById('gifCountdown');
 
 gifBtn.addEventListener('click', () => {
   if (gifRecording) return;
+
+  const duration = Math.max(2, Math.min(30,
+    parseInt(document.getElementById('gifDuration').value) || 5
+  )) * 1000; // convert to ms
+
   gifRecording = true;
   gifBtn.disabled = true;
   gifBtn.textContent = '⏺ Recording…';
   gifIndicator.classList.remove('hidden');
 
+  let remaining = Math.round(duration / 1000);
+  gifCountdown.textContent = `${remaining}s`;
+  const ticker = setInterval(() => {
+    remaining--;
+    gifCountdown.textContent = remaining > 0 ? `${remaining}s` : '';
+  }, 1000);
+
   exporter.startGIF();
 
   setTimeout(() => {
+    clearInterval(ticker);
+    gifCountdown.textContent = '';
     exporter.stopGIF(
       (p)  => { gifBtn.textContent = `⏳ ${Math.round(p * 100)}%`; },
       ()   => {
@@ -412,5 +542,5 @@ gifBtn.addEventListener('click', () => {
         gifIndicator.classList.add('hidden');
       }
     );
-  }, 3000);
+  }, duration);
 });

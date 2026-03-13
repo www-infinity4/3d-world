@@ -25,7 +25,14 @@
     </nav>
     <div class="topbar-actions">
       <button id="exportPngBtn" title="Export PNG screenshot">📷 Export PNG</button>
-      <button id="exportGifBtn" title="Record &amp; export GIF (3 s)">🎞️ Record GIF</button>
+      <label class="gif-duration-label">
+        <span aria-hidden="true">⏱</span>
+        <span class="sr-only">GIF recording duration</span>
+        <input type="number" id="gifDuration" min="2" max="30" value="5" step="1"
+               aria-label="GIF recording duration in seconds" />
+        <span aria-hidden="true">s</span>
+      </label>
+      <button id="exportGifBtn" title="Record &amp; export animated GIF">🎞️ Record GIF</button>
     </div>
   </header>
 
@@ -127,22 +134,74 @@
       <!-- Builder panel (hidden unless Build mode) -->
       <section class="panel hidden" id="buildPanel">
         <h3>🏗️ 3D Builder</h3>
-        <label>Primitive
-          <select id="primitiveType">
-            <option value="box">Box</option>
-            <option value="sphere">Sphere</option>
-            <option value="cylinder">Cylinder</option>
-            <option value="torus">Torus</option>
-            <option value="cone">Cone</option>
-          </select>
-        </label>
-        <label>Color <input type="color" id="primitiveColor" value="#00aaff" /></label>
-        <label>Scale
-          <input type="range" id="primitiveScale" min="0.1" max="5" value="1" step="0.1" />
-          <span id="primitiveScaleVal">1.0</span>
-        </label>
-        <button id="addPrimitiveBtn">➕ Add Object</button>
+
+        <!-- ── Primitives ── -->
+        <details open>
+          <summary class="panel-summary">Primitives</summary>
+          <label>Shape
+            <select id="primitiveType">
+              <option value="box">Box</option>
+              <option value="sphere">Sphere</option>
+              <option value="cylinder">Cylinder</option>
+              <option value="torus">Torus</option>
+              <option value="cone">Cone</option>
+            </select>
+          </label>
+          <label>Color <input type="color" id="primitiveColor" value="#00aaff" /></label>
+          <label>Scale
+            <input type="range" id="primitiveScale" min="0.1" max="5" value="1" step="0.1" />
+            <span id="primitiveScaleVal">1.0</span>
+          </label>
+          <button id="addPrimitiveBtn">➕ Add Shape</button>
+        </details>
+
+        <hr />
+
+        <!-- ── Prefab structures ── -->
+        <details open>
+          <summary class="panel-summary">🏛️ Structures</summary>
+          <label>Type
+            <select id="structureType">
+              <option value="marketplace">🛒 Marketplace Stall</option>
+              <option value="spa">🛁 Spa Room</option>
+              <option value="corridor">🚪 Corridor</option>
+              <option value="plaza">⛲ Plaza</option>
+              <option value="tower">🗼 Tower</option>
+            </select>
+          </label>
+          <label>Color <input type="color" id="structureColor" value="#aa00ff" /></label>
+          <label>Scale
+            <input type="range" id="structureScale" min="0.2" max="3" value="1" step="0.1" />
+            <span id="structureScaleVal">1.0</span>
+          </label>
+          <label class="inline-label">Snap to grid
+            <input type="checkbox" id="snapToGrid" checked />
+          </label>
+          <button id="addStructureBtn">🏛️ Place Structure</button>
+        </details>
+
+        <hr />
+
+        <!-- ── Sector management ── -->
+        <details open>
+          <summary class="panel-summary">🗺️ Sectors</summary>
+          <label>Sector name
+            <input type="text" id="sectorName" placeholder="e.g. Marketplace" maxlength="32" />
+          </label>
+          <label>Sector color <input type="color" id="sectorColor" value="#00aaff" /></label>
+          <button id="addSectorBtn">➕ Create Sector</button>
+          <label class="sector-active-label">Active sector
+            <select id="activeSector">
+              <option value="">— None (loose) —</option>
+            </select>
+          </label>
+          <div id="sectorList" class="sector-list"></div>
+        </details>
+
+        <hr />
+
         <button id="clearSceneBtn">🗑 Clear Scene</button>
+
         <hr />
         <h3>🌍 Environment</h3>
         <label>Background
@@ -153,12 +212,18 @@
             <option value="black">Pure black</option>
           </select>
         </label>
-        <label>Particle field
+        <label class="inline-label">Particle field
           <input type="checkbox" id="particleToggle" checked />
         </label>
-        <label>Auto-rotate
+        <label class="inline-label">Auto-rotate
           <input type="checkbox" id="autoRotate" checked />
         </label>
+
+        <hr />
+        <!-- Walk mode -->
+        <button id="walkModeBtn" title="Enter first-person walk mode (WASD + mouse)">🚶 Walk Mode</button>
+        <p class="walk-hint hidden" id="walkHint">WASD to move · Mouse to look · Esc to exit</p>
+
         <hr />
         <button id="exportSceneBtn">💾 Export Scene JSON</button>
       </section>
@@ -168,7 +233,8 @@
     <main class="canvas-wrap" id="canvasWrap">
       <canvas id="mainCanvas"></canvas>
       <div id="overlay">
-        <div id="gifIndicator" class="hidden">⏺ Recording…</div>
+        <div id="gifIndicator" class="hidden">⏺ Recording… <span id="gifCountdown"></span></div>
+        <div id="walkIndicator" class="hidden">🚶 Walk Mode — WASD · Mouse · Esc to exit</div>
         <div id="statsBox"></div>
       </div>
     </main>
