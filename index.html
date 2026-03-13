@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D World – Audio &amp; Visualization Studio</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- ── Top bar ── -->
+  <header class="topbar">
+    <span class="logo">🌐 3D World Studio</span>
+    <nav class="topbar-tabs" id="modeTabs">
+      <button class="tab-btn active" data-mode="audio">🎵 Audio&nbsp;Visualizer</button>
+      <button class="tab-btn" data-mode="charts">📊 3D&nbsp;Charts</button>
+      <button class="tab-btn" data-mode="build">🏗️ 3D&nbsp;Builder</button>
+    </nav>
+    <div class="topbar-actions">
+      <button id="exportPngBtn" title="Export PNG screenshot">📷 Export PNG</button>
+      <button id="exportGifBtn" title="Record &amp; export GIF (3 s)">🎞️ Record GIF</button>
+    </div>
+  </header>
+
+  <!-- ── Main layout ── -->
+  <div class="workspace">
+
+    <!-- ─── Left sidebar: controls ─── -->
+    <aside class="sidebar" id="sidebar">
+
+      <!-- Audio panel -->
+      <section class="panel" id="audioPanel">
+        <h3>🎧 Audio Input</h3>
+        <label class="file-label" for="audioFile">📂 Load audio file</label>
+        <input type="file" id="audioFile" accept="audio/*" />
+
+        <div class="control-row">
+          <button id="micBtn" title="Use microphone">🎤 Mic</button>
+          <button id="playBtn" disabled>▶ Play</button>
+          <button id="stopBtn" disabled>⏹ Stop</button>
+        </div>
+
+        <label>Volume <span id="volVal">100</span>%
+          <input type="range" id="volSlider" min="0" max="150" value="100" />
+        </label>
+
+        <hr />
+        <h3>🔊 Equalizer</h3>
+        <div class="eq-grid" id="eqGrid">
+          <!-- filled by JS -->
+        </div>
+
+        <hr />
+        <h3>🔬 Analysis</h3>
+        <label>FFT size
+          <select id="fftSize">
+            <option value="512">512</option>
+            <option value="1024">1 024</option>
+            <option value="2048" selected>2 048</option>
+            <option value="4096">4 096</option>
+            <option value="8192">8 192</option>
+          </select>
+        </label>
+        <label>Smoothing
+          <input type="range" id="smoothing" min="0" max="99" value="80" />
+        </label>
+        <div class="mini-canvas-wrap">
+          <canvas id="waveCanvas" width="220" height="60"></canvas>
+          <canvas id="freqCanvas" width="220" height="60"></canvas>
+        </div>
+
+        <hr />
+        <h3>✂️ Clip Slicer</h3>
+        <label>Clip length (s)
+          <input type="number" id="clipLen" min="0.1" max="30" value="2" step="0.1" />
+        </label>
+        <button id="sliceBtn" disabled>Slice &amp; Analyze</button>
+        <div id="clipList" class="clip-list"></div>
+      </section>
+
+      <!-- Charts panel (hidden unless Charts mode) -->
+      <section class="panel hidden" id="chartsPanel">
+        <h3>📊 Chart Builder</h3>
+        <label>Chart type
+          <select id="chartType">
+            <option value="bar">Bar</option>
+            <option value="scatter">Scatter</option>
+            <option value="line">Line</option>
+            <option value="surface">Surface</option>
+          </select>
+        </label>
+        <label>Dataset
+          <select id="datasetPreset">
+            <option value="random">Random</option>
+            <option value="sine">Sine wave</option>
+            <option value="spiral">Spiral</option>
+            <option value="gaussian">Gaussian</option>
+          </select>
+        </label>
+        <label>Points
+          <input type="range" id="chartPoints" min="10" max="500" value="100" />
+          <span id="chartPointsVal">100</span>
+        </label>
+        <button id="buildChartBtn">Build Chart</button>
+        <hr />
+        <h3>🎨 Appearance</h3>
+        <label>Color scheme
+          <select id="colorScheme">
+            <option value="rainbow">Rainbow</option>
+            <option value="heat">Heat map</option>
+            <option value="cool">Cool blues</option>
+            <option value="mono">Monochrome</option>
+          </select>
+        </label>
+        <label>Wireframe
+          <input type="checkbox" id="wireframeToggle" />
+        </label>
+      </section>
+
+      <!-- Builder panel (hidden unless Build mode) -->
+      <section class="panel hidden" id="buildPanel">
+        <h3>🏗️ 3D Builder</h3>
+        <label>Primitive
+          <select id="primitiveType">
+            <option value="box">Box</option>
+            <option value="sphere">Sphere</option>
+            <option value="cylinder">Cylinder</option>
+            <option value="torus">Torus</option>
+            <option value="cone">Cone</option>
+          </select>
+        </label>
+        <label>Color <input type="color" id="primitiveColor" value="#00aaff" /></label>
+        <label>Scale
+          <input type="range" id="primitiveScale" min="0.1" max="5" value="1" step="0.1" />
+          <span id="primitiveScaleVal">1.0</span>
+        </label>
+        <button id="addPrimitiveBtn">➕ Add Object</button>
+        <button id="clearSceneBtn">🗑 Clear Scene</button>
+        <hr />
+        <h3>🌍 Environment</h3>
+        <label>Background
+          <select id="bgPreset">
+            <option value="space">Deep space</option>
+            <option value="grid">Grid floor</option>
+            <option value="fog">Fog</option>
+            <option value="black">Pure black</option>
+          </select>
+        </label>
+        <label>Particle field
+          <input type="checkbox" id="particleToggle" checked />
+        </label>
+        <label>Auto-rotate
+          <input type="checkbox" id="autoRotate" checked />
+        </label>
+        <hr />
+        <button id="exportSceneBtn">💾 Export Scene JSON</button>
+      </section>
+    </aside>
+
+    <!-- ─── Main 3D canvas ─── -->
+    <main class="canvas-wrap" id="canvasWrap">
+      <canvas id="mainCanvas"></canvas>
+      <div id="overlay">
+        <div id="gifIndicator" class="hidden">⏺ Recording…</div>
+        <div id="statsBox"></div>
+      </div>
+    </main>
+
+    <!-- ─── Right: info / clip detail ─── -->
+    <aside class="info-panel" id="infoPanel">
+      <h3>📈 Live Stats</h3>
+      <div id="liveStats">
+        <div>BPM: <span id="bpmVal">–</span></div>
+        <div>Peak freq: <span id="peakFreqVal">–</span></div>
+        <div>RMS: <span id="rmsVal">–</span></div>
+        <div>Loudness: <span id="loudnessVal">–</span></div>
+        <div>FPS: <span id="fpsVal">–</span></div>
+      </div>
+      <hr />
+      <h3>🧩 Clip Detail</h3>
+      <div id="clipDetail">Select a clip to inspect</div>
+      <hr />
+      <h3>🌈 Viz Mode</h3>
+      <div class="viz-mode-btns">
+        <button class="viz-btn active" data-viz="spectrum">Spectrum</button>
+        <button class="viz-btn" data-viz="waveRibbon">Waveform</button>
+        <button class="viz-btn" data-viz="particles">Particles</button>
+        <button class="viz-btn" data-viz="globe">Globe</button>
+        <button class="viz-btn" data-viz="tunnel">Tunnel</button>
+      </div>
+    </aside>
+
+  </div><!-- .workspace -->
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
