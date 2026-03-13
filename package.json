@@ -1,0 +1,25 @@
+{
+  "name": "3d-world",
+  "version": "1.0.0",
+  "description": "3D visualization widget with audio analysis, charts, graphs, and interactive 3D builds",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "npx serve . -l 8080",
+    "dev": "npx serve . -l 8080",
+    "build": "echo 'Static site - no build step required'"
+  },
+  "keywords": [
+    "3d",
+    "audio",
+    "visualization",
+    "webgl",
+    "three.js",
+    "charts",
+    "graphs",
+    "spectrum",
+    "waveform"
+  ],
+  "author": "3d-world contributors",
+  "license": "MIT"
+}
