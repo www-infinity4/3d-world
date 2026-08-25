@@ -62,7 +62,203 @@ The system must learn from demonstrated corrections while keeping unresolved cla
 
 ---
 
-## 2. Core vision
+## 2. Paragraph-level conversation gears
+
+### Interface requirement
+
+Long technical answers need a control beside each paragraph, equation, table, and schematic. Kris currently marks important passages with hand-drawn stars in screenshots; the intended production control is a small **gear** or similarly clear action button.
+
+Selecting the control should open a focused conversation attached to that exact content block. The main document remains readable while the focused thread allows the user to:
+
+- Correct one statement without repeating the surrounding answer
+- Add measurements, sources, or theory to a specific paragraph
+- Request a rewrite or expansion
+- Mark the block as accepted, disputed, experimental, or unresolved
+- Compare the original and revised block
+- Return to the exact reading position
+- Promote approved corrections into the research ledger
+- Preserve every branch without losing the main conversation
+
+### Proposed interaction
+
+```mermaid
+flowchart TD
+    A["Read answer"] --> B["Select paragraph gear"]
+    B --> C["Open focused side thread"]
+    C --> D["Correct or add evidence"]
+    D --> E["Revise selected block"]
+    E --> F["Return to reading position"]
+    D --> G["Create research-ledger item"]
+```
+
+### Minimal data contract
+
+```json
+{
+  "conversationId": "string",
+  "messageId": "string",
+  "blockId": "stable-content-block-id",
+  "selection": "paragraph | equation | table | schematic",
+  "status": "accepted | disputed | experimental | unresolved | revised",
+  "threadId": "string",
+  "returnAnchor": "string",
+  "ledgerItemId": "string-or-null"
+}
+```
+
+This is recorded as a product requirement only. It is not yet implemented by this repository.
+
+---
+
+## 3. Oxide quantum-computer schematic
+
+### 3.1 Logical cavity pair
+
+Two boron-defined cavities form one differential logical cell. One controlled carrier is shared across the pair.
+
+```text
+|0L> = |1A 0B>
+|1L> = |0A 1B>
+
+|ψ> = α|1A 0B> + e^(iφ)β|0A 1B>
+```
+
+- Cavity A occupied and cavity B empty represents one basis state.
+- Cavity A empty and cavity B occupied represents the opposite basis state.
+- The proposed superposition stores information in the amplitude and phase relationship across both cavities.
+- A successful experiment must distinguish coherent behavior from two synchronized classical switches.
+
+### 3.2 Physical layer stack
+
+```mermaid
+flowchart TB
+    A["Carbon or aluminum top electrode"] --> B["h-BN confinement and heat barrier"]
+    B --> C["B₂O₃–SiO₂ molecular-setting matrix"]
+    C --> D["TiO₂₋ₓ or mixed-valence switching oxide"]
+    D --> E["Al₂O₃ tunnel and dielectric layer"]
+    E --> F["Aluminum base electrode and heat path"]
+```
+
+Candidate roles:
+
+| Material | Primary role |
+|---|---|
+| Aluminum | Recyclable electrode, structure, and thermal path |
+| Aluminum oxide | Dielectric, tunnel barrier, nanoporous template |
+| Boron oxide | Glass-network formation, binding, molecular-interface research |
+| Boron nitride | High-temperature confinement and insulation |
+| Silicon dioxide | Network spacing and diffusion control |
+| Titanium oxide | Oxygen-vacancy switching |
+| Iron oxide | Mixed-valence and polaron-hopping research |
+| Gallium oxide | Wide-bandgap interface and high-field research |
+| Carbon | Conductive wall, electrode, and optical/thermal interface |
+
+### 3.3 Opposing magnetic-pulse operation
+
+The two cavities receive phase-locked drives separated by 180 degrees:
+
+```text
+VA(t) = V0 cos(ωt)
+VB(t) = V0 cos(ωt + π) = −VA(t)
+```
+
+The same relationship can be tested with magnetic excitation:
+
+```text
+BA(t) = B0 cos(ωt)
+BB(t) = −BA(t)
+```
+
+```mermaid
+flowchart LR
+    P["Phase-locked pulse source"] --> A["Coil A: 0°"]
+    P --> B["Coil B: 180°"]
+    A --> C["Boron cavity A"]
+    B --> D["Boron cavity B"]
+    C <--> E["Tunable oxide barrier"]
+    D <--> E
+```
+
+The field supplies control energy. It must be weak enough to preserve the stored relationship rather than forcing an ordinary alternating switch.
+
+### 3.4 Write, hold, read, route, and reset
+
+```mermaid
+stateDiagram-v2
+    [*] --> EmptyPair
+    EmptyPair --> Prepared: clear cavities
+    Prepared --> Coupled: introduce one carrier
+    Coupled --> PhaseDrive: apply opposing pulses
+    PhaseDrive --> Hold: preserve amplitude and phase
+    Hold --> Read: measure without overwriting
+    Read --> Route: select color operation
+    Route --> Hold: continue computation
+    Read --> Reset: release or relocate carrier
+    Reset --> EmptyPair
+```
+
+### 3.5 Color-addressed operations
+
+Color is treated as an optical address and diagnostic channel. Different wavelengths may interact with the same stored information through different transitions.
+
+| Color | System operation | Candidate physical action |
+|---|---|---|
+| Red | Route | Select another cavity, wavelength, or output path |
+| Blue | Import | Introduce carrier, atom, molecule, charge, or encoded vibration |
+| Yellow | Extract | Read or remove a carrier/state |
+| Green | Build/connect | Stabilize or couple a material structure |
+| Purple | Assimilate | Combine imported material with the routed structure |
+| Orange | Decide | Apply threshold, comparison, or state selection |
+
+Quantum dots provide wavelength-selective absorption and emission. Their color depends on composition, size, strain, charge state, and surrounding fields, allowing optical addressing and state readout.
+
+### 3.6 Multimodal sensor ring
+
+Magnetometers are central when the cell uses spins, magnetic oxides, or magnetic-field routing, but the experiment requires synchronized measurements:
+
+```mermaid
+flowchart TD
+    C["Paired oxide–boron cavity"] --> M["Vector magnetometer"]
+    C --> O["Photon and color detector"]
+    C --> R["Raman/phonon detector"]
+    C --> I["Impedance and phase analyzer"]
+    C --> T["Temperature monitor"]
+    M --> L["Time-aligned state record"]
+    O --> L
+    R --> L
+    I --> L
+    T --> L
+```
+
+Recommended instrumentation:
+
+- Vector magnetometer
+- Photoluminescence spectrometer
+- Raman spectrometer
+- Impedance and phase analyzer
+- Lock-in amplifier
+- Temperature sensors
+- Piezoelectric or acoustic sensors
+- Time-correlated photon detector for later single-photon work
+
+### 3.7 Decisive experiments
+
+1. **Classical differential control:** demonstrate opposite-phase switching between two cavities.
+2. **Thermal exclusion:** show the result is not explained by heating.
+3. **Single-carrier sensitivity:** determine whether one carrier changes the readout.
+4. **Coherent oscillation:** measure repeatable phase-dependent oscillations.
+5. **Interference:** vary relative pulse phase and observe an interference pattern.
+6. **Retention:** measure how long the paired state remains readable.
+7. **Non-destructive read:** verify that observation does not immediately overwrite the state.
+8. **Color routing:** show redirection by wavelength while preserving encoded information.
+9. **Magnetic correlation:** correlate magnetometer signals with optical and electrical state changes.
+10. **Independent reproduction:** repeat the experiment using separately fabricated cells.
+
+The words **quantum superposition** remain a research classification until coherent phase, oscillation, and interference are measured. Synchronized classical switching is retained as the first useful hardware milestone.
+
+---
+
+## 4. Core vision
 
 The final device is a programmable household microfactory that:
 
@@ -130,7 +326,7 @@ Matter is transformed rather than destroyed. In chemistry, “consumed” means 
 
 ---
 
-## 5. Aluminum-to-oxide cycle
+## 7. Aluminum-to-oxide cycle
 
 Aluminum recovered from a can can provide structural material, electrodes, heat paths, and oxide precursors.
 
@@ -165,7 +361,7 @@ Other metals require individual oxide recipes. They cannot all be processed with
 
 ---
 
-## 6. Monolithic print-in-place construction
+## 8. Monolithic print-in-place construction
 
 The robot should be fabricated as connected assemblies rather than as loose pieces requiring extensive manual assembly.
 
@@ -201,7 +397,7 @@ The machine measures the actual printed geometry and automatically compensates i
 
 ---
 
-## 7. Oxide–boron computational lattice
+## 9. Oxide–boron computational lattice
 
 The proposed computer core is not a conventional board connected by separate wires. It is a monolithic material system in which structure, insulation, sensing, memory, and signal transfer are printed as interacting regions.
 
@@ -246,7 +442,7 @@ A quantized lattice vibration is a **phonon**. Candidate coupling mechanisms inc
 
 ---
 
-## 8. Molecular capture and imprinting
+## 10. Molecular capture and imprinting
 
 Each oxide–boron cell is intended to sense, collect, organize, and record molecular information.
 
@@ -286,7 +482,7 @@ Large arrays of these cells could guide material placement and retain fabricatio
 
 ---
 
-## 9. Beverage-container processing
+## 11. Beverage-container processing
 
 The container and its fluid contents enter separate processing paths.
 
@@ -317,7 +513,7 @@ Every output must be chemically identified before reuse. Beverage fluid alone is
 
 ---
 
-## 10. Fabrication stations
+## 12. Fabrication stations
 
 The full microfactory requires coordinated modules:
 
@@ -336,7 +532,7 @@ The full microfactory requires coordinated modules:
 
 ---
 
-## 11. Energy architecture
+## 13. Energy architecture
 
 The microfactory needs high-grade heat and electricity, but an experimental household nuclear reactor is outside the safe prototype scope.
 
@@ -355,7 +551,7 @@ A nuclear source, if ever used, remains a separately licensed and contained ener
 
 ---
 
-## 12. Development generations
+## 14. Development generations
 
 ### Generation 0 — Measurement rig
 
@@ -412,7 +608,7 @@ A nuclear source, if ever used, remains a separately licensed and contained ener
 
 ---
 
-## 13. First experiment
+## 15. First experiment
 
 **Objective:** determine whether a printed oxide–boron cell can be written, read, reset, and rewritten using controlled electrical and vibrational excitation.
 
@@ -449,7 +645,7 @@ A nuclear source, if ever used, remains a separately licensed and contained ener
 
 ---
 
-## 14. Research ledger
+## 16. Research ledger
 
 Every proposed mechanism receives one status:
 
@@ -481,7 +677,7 @@ Each record contains:
 
 ---
 
-## 15. Non-planned-obsolescence rules
+## 17. Non-planned-obsolescence rules
 
 - No arbitrary expiration dates.
 - Replace components according to measured condition.
@@ -496,7 +692,7 @@ Each record contains:
 
 ---
 
-## 16. Immediate backlog
+## 18. Immediate backlog
 
 - [ ] Define the material and energy ledger schemas.
 - [ ] Draw the Generation 0 anodic-oxide test cell.
@@ -516,6 +712,6 @@ Each record contains:
 
 ---
 
-## 17. Guiding principle
+## 19. Guiding principle
 
 The system is meant to learn through correction and measurement. Human insight generates hypotheses; AI organizes them; instruments decide whether a claimed mechanism is repeatable. The long-term objective is a durable household fabrication system that transforms recovered material into useful machines while retaining local ownership, repairability, and transparent evidence.
