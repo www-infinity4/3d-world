@@ -13,7 +13,56 @@ The project begins with a correction loop: when a person challenges an AI answer
 
 ---
 
-## 1. Core vision
+## 1. Priority unresolved research
+
+These questions govern the project. Work on downstream robot production should not outrun the evidence required here.
+
+| Priority | Unresolved question | Why it comes first | Required proof |
+|---:|---|---|---|
+| P0 | Can a fabricated oxide–boron cell be written, read, reset, and rewritten reliably? | The proposed computer core depends on repeatable state storage. | Blind readout tests, endurance cycles, retention measurements, and independent reproduction |
+| P0 | Can controlled vibration or phonon excitation move or stabilize useful defect states? | This is the proposed oxide-to-oxide signal carrier. | Frequency-response maps separating vibration effects from heat and ordinary electrical switching |
+| P0 | What physical state constitutes the boron imprint? | “Missing spaces” must correspond to measurable vacancies, trapped charge, resistance, or optical states. | Structural imaging plus correlated electrical and optical measurements |
+| P0 | Can energy and information cross adjacent printed oxide regions without discrete wiring? | The monolithic circuit depends on a verified coupling mechanism. | Measured transfer efficiency, distance, bandwidth, error rate, and energy per pulse |
+| P1 | Can aluminum-can feedstock produce repeatable electronic-grade oxide structures? | Coatings, alloying elements, and contamination may dominate device behavior. | Composition analysis, purification yield, oxide uniformity, and device-to-device variance |
+| P1 | Can process oxygen, electrolytes, cathodes, water, and heat be recovered in a practical loop? | Closed-loop manufacturing requires quantified recovery rather than assumed reuse. | Complete mass and energy balances across repeated cycles |
+| P1 | Can a molecular target create a selective, readable, reversible imprint? | Molecular collection and assembly require specificity. | Blind target/control trials, false-positive rate, reset cycles, and degradation data |
+| P1 | Can captive metal mechanisms be printed in place with useful motion and near-zero play? | Robot assembly depends on connected moving parts. | Clearance coupons, torque, wear, contamination, thermal-expansion, and load tests |
+| P2 | Which robot components can actually be fabricated from aluminum, oxides, boron compounds, and recovered fluids? | The self-production ratio must be based on demonstrated components. | Component-by-component material, process, tolerance, and test records |
+| P2 | Which imported bootstrap components remain unavoidable? | Processors, magnets, batteries, cameras, and bearings cannot be treated as solved. | Dependency ledger and a research plan for replacing each dependency |
+| P2 | What energy source and thermal architecture can run safely in a home? | High-temperature processing cannot proceed without containment and energy accounting. | Thermal model, emissions control, shutdown behavior, and applicable safety review |
+| P3 | Can the fabrication cell reproduce verified parts of itself? | Self-replication is the final dependency, not the starting assumption. | Printed replacement component, automated installation, calibration, and equivalence testing |
+
+### Research execution order
+
+1. Build the measurement and conservation ledger.
+2. Establish safe aluminum-to-oxide reference samples.
+3. Fabricate and characterize one oxide–boron memory cell.
+4. Isolate electrical, thermal, optical, ionic, and vibrational effects.
+5. Demonstrate repeatable state transfer between two adjacent cells.
+6. Test molecular imprinting with known safe controls.
+7. Validate print-in-place mechanical coupons.
+8. Integrate only mechanisms that pass predefined success criteria.
+9. Publish failures and revised hypotheses alongside successful results.
+10. Increase the self-production ratio only after each subsystem is measured.
+
+### Correction protocol
+
+When Kris or another contributor corrects an AI-generated limitation or interpretation, the correction becomes a prioritized research record containing:
+
+- Original statement
+- Proposed correction
+- Competing physical explanations
+- Measurement capable of distinguishing them
+- Safety and equipment requirements
+- Raw observations
+- Result and confidence
+- Revised engineering rule
+
+The system must learn from demonstrated corrections while keeping unresolved claims visible instead of silently converting them into established facts.
+
+---
+
+## 2. Core vision
 
 The final device is a programmable household microfactory that:
 
@@ -31,7 +80,7 @@ External components are permitted only as documented bootstrap dependencies. Eac
 
 ---
 
-## 2. System metric: self-production ratio
+## 3. System metric: self-production ratio
 
 ```text
 self-production ratio =
@@ -54,7 +103,7 @@ The ledger must also track:
 
 ---
 
-## 3. Closed-loop workflow
+## 4. Closed-loop workflow
 
 ```mermaid
 flowchart TD
@@ -81,7 +130,7 @@ Matter is transformed rather than destroyed. In chemistry, “consumed” means 
 
 ---
 
-## 4. Aluminum-to-oxide cycle
+## 5. Aluminum-to-oxide cycle
 
 Aluminum recovered from a can can provide structural material, electrodes, heat paths, and oxide precursors.
 
@@ -116,7 +165,7 @@ Other metals require individual oxide recipes. They cannot all be processed with
 
 ---
 
-## 5. Monolithic print-in-place construction
+## 6. Monolithic print-in-place construction
 
 The robot should be fabricated as connected assemblies rather than as loose pieces requiring extensive manual assembly.
 
@@ -152,7 +201,7 @@ The machine measures the actual printed geometry and automatically compensates i
 
 ---
 
-## 6. Oxide–boron computational lattice
+## 7. Oxide–boron computational lattice
 
 The proposed computer core is not a conventional board connected by separate wires. It is a monolithic material system in which structure, insulation, sensing, memory, and signal transfer are printed as interacting regions.
 
@@ -197,7 +246,7 @@ A quantized lattice vibration is a **phonon**. Candidate coupling mechanisms inc
 
 ---
 
-## 7. Molecular capture and imprinting
+## 8. Molecular capture and imprinting
 
 Each oxide–boron cell is intended to sense, collect, organize, and record molecular information.
 
@@ -237,7 +286,7 @@ Large arrays of these cells could guide material placement and retain fabricatio
 
 ---
 
-## 8. Beverage-container processing
+## 9. Beverage-container processing
 
 The container and its fluid contents enter separate processing paths.
 
@@ -268,7 +317,7 @@ Every output must be chemically identified before reuse. Beverage fluid alone is
 
 ---
 
-## 9. Fabrication stations
+## 10. Fabrication stations
 
 The full microfactory requires coordinated modules:
 
@@ -287,7 +336,7 @@ The full microfactory requires coordinated modules:
 
 ---
 
-## 10. Energy architecture
+## 11. Energy architecture
 
 The microfactory needs high-grade heat and electricity, but an experimental household nuclear reactor is outside the safe prototype scope.
 
@@ -306,7 +355,7 @@ A nuclear source, if ever used, remains a separately licensed and contained ener
 
 ---
 
-## 11. Development generations
+## 12. Development generations
 
 ### Generation 0 — Measurement rig
 
@@ -363,7 +412,7 @@ A nuclear source, if ever used, remains a separately licensed and contained ener
 
 ---
 
-## 12. First experiment
+## 13. First experiment
 
 **Objective:** determine whether a printed oxide–boron cell can be written, read, reset, and rewritten using controlled electrical and vibrational excitation.
 
@@ -400,7 +449,7 @@ A nuclear source, if ever used, remains a separately licensed and contained ener
 
 ---
 
-## 13. Research ledger
+## 14. Research ledger
 
 Every proposed mechanism receives one status:
 
@@ -432,7 +481,7 @@ Each record contains:
 
 ---
 
-## 14. Non-planned-obsolescence rules
+## 15. Non-planned-obsolescence rules
 
 - No arbitrary expiration dates.
 - Replace components according to measured condition.
@@ -447,7 +496,7 @@ Each record contains:
 
 ---
 
-## 15. Immediate backlog
+## 16. Immediate backlog
 
 - [ ] Define the material and energy ledger schemas.
 - [ ] Draw the Generation 0 anodic-oxide test cell.
@@ -467,6 +516,6 @@ Each record contains:
 
 ---
 
-## 16. Guiding principle
+## 17. Guiding principle
 
 The system is meant to learn through correction and measurement. Human insight generates hypotheses; AI organizes them; instruments decide whether a claimed mechanism is repeatable. The long-term objective is a durable household fabrication system that transforms recovered material into useful machines while retaining local ownership, repairability, and transparent evidence.
