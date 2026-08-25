@@ -276,7 +276,7 @@ External components are permitted only as documented bootstrap dependencies. Eac
 
 ---
 
-## 3. System metric: self-production ratio
+## 5. System metric: self-production ratio
 
 ```text
 self-production ratio =
@@ -299,7 +299,7 @@ The ledger must also track:
 
 ---
 
-## 4. Closed-loop workflow
+## 6. Closed-loop workflow
 
 ```mermaid
 flowchart TD
@@ -326,7 +326,7 @@ Matter is transformed rather than destroyed. In chemistry, “consumed” means 
 
 ---
 
-## 7. Aluminum-to-oxide cycle
+## 9. Aluminum-to-oxide cycle
 
 Aluminum recovered from a can can provide structural material, electrodes, heat paths, and oxide precursors.
 
@@ -361,7 +361,7 @@ Other metals require individual oxide recipes. They cannot all be processed with
 
 ---
 
-## 8. Monolithic print-in-place construction
+## 10. Monolithic print-in-place construction
 
 The robot should be fabricated as connected assemblies rather than as loose pieces requiring extensive manual assembly.
 
@@ -397,7 +397,7 @@ The machine measures the actual printed geometry and automatically compensates i
 
 ---
 
-## 9. Oxide–boron computational lattice
+## 11. Oxide–boron computational lattice
 
 The proposed computer core is not a conventional board connected by separate wires. It is a monolithic material system in which structure, insulation, sensing, memory, and signal transfer are printed as interacting regions.
 
@@ -442,7 +442,7 @@ A quantized lattice vibration is a **phonon**. Candidate coupling mechanisms inc
 
 ---
 
-## 10. Molecular capture and imprinting
+## 12. Molecular capture and imprinting
 
 Each oxide–boron cell is intended to sense, collect, organize, and record molecular information.
 
@@ -482,7 +482,7 @@ Large arrays of these cells could guide material placement and retain fabricatio
 
 ---
 
-## 11. Beverage-container processing
+## 13. Beverage-container processing
 
 The container and its fluid contents enter separate processing paths.
 
@@ -513,7 +513,7 @@ Every output must be chemically identified before reuse. Beverage fluid alone is
 
 ---
 
-## 12. Fabrication stations
+## 14. Fabrication stations
 
 The full microfactory requires coordinated modules:
 
@@ -532,7 +532,7 @@ The full microfactory requires coordinated modules:
 
 ---
 
-## 13. Energy architecture
+## 15. Energy architecture
 
 The microfactory needs high-grade heat and electricity, but an experimental household nuclear reactor is outside the safe prototype scope.
 
@@ -551,7 +551,7 @@ A nuclear source, if ever used, remains a separately licensed and contained ener
 
 ---
 
-## 14. Development generations
+## 16. Development generations
 
 ### Generation 0 — Measurement rig
 
@@ -608,7 +608,7 @@ A nuclear source, if ever used, remains a separately licensed and contained ener
 
 ---
 
-## 15. First experiment
+## 17. First experiment
 
 **Objective:** determine whether a printed oxide–boron cell can be written, read, reset, and rewritten using controlled electrical and vibrational excitation.
 
@@ -645,7 +645,7 @@ A nuclear source, if ever used, remains a separately licensed and contained ener
 
 ---
 
-## 16. Research ledger
+## 18. Research ledger
 
 Every proposed mechanism receives one status:
 
@@ -677,7 +677,7 @@ Each record contains:
 
 ---
 
-## 17. Non-planned-obsolescence rules
+## 19. Non-planned-obsolescence rules
 
 - No arbitrary expiration dates.
 - Replace components according to measured condition.
@@ -692,7 +692,7 @@ Each record contains:
 
 ---
 
-## 18. Immediate backlog
+## 20. Immediate backlog
 
 - [ ] Define the material and energy ledger schemas.
 - [ ] Draw the Generation 0 anodic-oxide test cell.
@@ -712,6 +712,6 @@ Each record contains:
 
 ---
 
-## 19. Guiding principle
+## 21. Guiding principle
 
 The system is meant to learn through correction and measurement. Human insight generates hypotheses; AI organizes them; instruments decide whether a claimed mechanism is repeatable. The long-term objective is a durable household fabrication system that transforms recovered material into useful machines while retaining local ownership, repairability, and transparent evidence.
