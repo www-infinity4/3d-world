@@ -2,15 +2,18 @@
 
 Working prototype for paragraph-level conversation branches.
 
-Each paragraph, equation, table, or schematic is an addressable token block. Its gear opens a focused thread without losing the reader's location. A contribution can be recorded as a note, correction, expansion, or replacement revision and categorized as accepted, disputed, experimental, unresolved, or revised.
+Each paragraph, equation, table, or schematic is an addressable token block. Its small gear moves the ordinary chat composer directly beneath that block, so the user can continue the conversation at the exact point being discussed. The human only writes the message; categorization and status metadata are inferred and stored behind the interface.
+
+Revisions are append-only. The newest content remains open and readable in the main conversation. Earlier wording and older branch turns are never wiped: arrow expanders fold them out of the way until the reader wants their full history.
 
 ## Context graph
 
 ```text
-conversation → message → block → focused thread → token edits → accepted revision
+conversation → message → block → inline branch → newest revision
+                                      └─ folded earlier history
 ```
 
-The prototype uses stable block IDs and D1-backed token-edit history. A revision can replace the displayed paragraph while retaining the earlier block and discussion in history.
+The prototype uses stable block IDs and D1-backed context-entry history. A revision can become the displayed content while retaining the earlier block and discussion in collapsible history.
 
 ## Integration path
 
@@ -18,25 +21,24 @@ This is not an official ChatGPT plugin. It demonstrates the product and data mod
 
 1. Split assistant output into stable semantic blocks.
 2. Render a gear beside every block.
-3. Send the selected block ID and surrounding context to a focused conversation.
-4. Store edits as append-only records.
-5. Promote an accepted revision into the primary response while retaining provenance.
-6. Export categorized history for research, engineering, or another AI system.
+3. Relocate the existing composer beneath the selected block and send its stable ID with surrounding context.
+4. Infer record type, status, and category without asking the human to fill in database fields.
+5. Store every contribution as an append-only record.
+6. Keep the newest revision visible while folding earlier wording and older turns behind arrow controls.
+7. Export categorized history for research, engineering, or another AI system.
 
 ## Current prototype
 
-- Responsive document and focused-thread layout
-- Paragraph-level gear controls
-- Notes, corrections, expansions, and direct revisions
-- Status and category classification
+- Familiar responsive chat layout
+- Paragraph-level gear controls that relocate the composer inline
+- Newest content visible with foldable earlier wording and branch turns
+- Automatic record-type, status, and category classification
 - Durable D1 history
 - JSON history export
-- Mobile side-sheet interaction
 
 ## Next steps
 
 - Stable selection IDs for equations, tables, and partial paragraphs
-- Thread replies and parent-child nesting
 - Original-versus-revision diff view
 - Search and category filters
 - Conflict detection for simultaneous revisions
