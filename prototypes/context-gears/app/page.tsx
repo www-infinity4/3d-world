@@ -1,90 +1,15 @@
 "use client";
-
-import { useEffect, useMemo, useState } from "react";
-
-type Block = { id: string; category: string; title: string; body: string };
-type Entry = {
-  id: number; blockId: string; kind: "note" | "correction" | "expansion" | "revision";
-  status: "unresolved" | "experimental" | "accepted" | "disputed" | "revised";
-  category: string; body: string; createdAt: string;
-};
-
-const seedBlocks: Block[] = [
-  { id: "cavity-pair", category: "quantum", title: "Paired cavity state", body: "Two boron-defined cavities form a differential logical cell. One controlled carrier is shared across the pair, while amplitude and phase encode the relationship between the cavities." },
-  { id: "opposed-pulses", category: "magnetics", title: "Opposing pulse cycle", body: "Cavity A and cavity B receive phase-locked drives separated by 180 degrees. The field between them is the active region, and the pulse must preserve the stored relationship rather than force an ordinary alternating switch." },
-  { id: "color-router", category: "optical", title: "Color-addressed routing", body: "Red routes, blue imports, yellow extracts, green connects, purple assimilates, and orange selects. Each wavelength addresses the same stored information through a different physical transition." },
-  { id: "measurement-rule", category: "validation", title: "Measurement boundary", body: "The device remains an experimental quantum proposal until coherent phase, oscillation, and interference are measured. Synchronized classical switching is retained as the first useful hardware milestone." },
-];
-const kindOptions = ["note", "correction", "expansion", "revision"] as const;
-const statusOptions = ["unresolved", "experimental", "accepted", "disputed", "revised"] as const;
-
-export default function Home() {
-  const [blocks, setBlocks] = useState(seedBlocks);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [kind, setKind] = useState<Entry["kind"]>("expansion");
-  const [status, setStatus] = useState<Entry["status"]>("unresolved");
-  const [category, setCategory] = useState("research");
-  const [draft, setDraft] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState("Select a gear beside any paragraph.");
-  const activeBlock = useMemo(() => blocks.find((block) => block.id === selected) ?? null, [blocks, selected]);
-  const activeEntries = entries.filter((entry) => entry.blockId === selected);
-
-  useEffect(() => {
-    fetch("/api/context-entries").then((response) => response.json()).then((data) => setEntries(data.entries ?? []))
-      .catch(() => setNotice("History is temporarily offline; the document is still editable."));
-  }, []);
-
-  function openBlock(id: string) {
-    setSelected(id);
-    const block = blocks.find((item) => item.id === id);
-    setCategory(block?.category ?? "research"); setDraft(""); setNotice(`Focused on ${block?.title ?? "selected block"}.`);
-  }
-
-  async function saveEntry() {
-    if (!activeBlock || !draft.trim()) return;
-    setSaving(true); setNotice("Recording token edit…");
-    try {
-      const response = await fetch("/api/context-entries", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ blockId: activeBlock.id, kind, status, category, body: draft }) });
-      const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "Save failed");
-      setEntries((current) => [...current, data.entry]);
-      if (kind === "revision") setBlocks((current) => current.map((block) => block.id === activeBlock.id ? { ...block, body: draft, category } : block));
-      setDraft(""); setNotice("Token edit attached to its exact paragraph.");
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Save failed"); } finally { setSaving(false); }
-  }
-
-  function exportHistory() {
-    const payload = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), blocks, entries }, null, 2);
-    const url = URL.createObjectURL(new Blob([payload], { type: "application/json" }));
-    const anchor = document.createElement("a"); anchor.href = url; anchor.download = "context-gears-history.json"; anchor.click(); URL.revokeObjectURL(url);
-  }
-
-  return <main className="shell">
-    <header className="topbar"><div><span className="eyebrow">Infinity research interface</span><h1>Context Gears</h1></div><button className="export" onClick={exportHistory}>Export history</button></header>
-    <section className="workspace">
-      <article className="document" aria-label="Editable research response">
-        <div className="documentHead"><span className="modelDot" /><div><strong>Oxide Quantum Computer</strong><p>Every paragraph is an addressable token block.</p></div></div>
-        {blocks.map((block, index) => <section className={`tokenBlock ${selected === block.id ? "active" : ""}`} key={block.id}>
-          <button className="gear" onClick={() => openBlock(block.id)} aria-label={`Discuss ${block.title}`} title="Open focused conversation">⚙</button>
-          <div className="blockMeta"><span>{String(index + 1).padStart(2, "0")}</span><span>{block.category}</span></div><h2>{block.title}</h2><p>{block.body}</p>
-          <div className="threadCount">{entries.filter((entry) => entry.blockId === block.id).length} attached edits</div>
-        </section>)}
-      </article>
-      <aside className={`focusPanel ${activeBlock ? "open" : ""}`} aria-live="polite">
-        {!activeBlock ? <div className="emptyFocus"><span className="largeGear">⚙</span><h2>Pull a paragraph forward</h2><p>Use its gear to correct, expand, categorize, or revise it without losing your reading position.</p></div> : <>
-          <div className="focusHead"><button className="back" onClick={() => setSelected(null)} aria-label="Close focused thread">←</button><div><span className="eyebrow">Focused context</span><h2>{activeBlock.title}</h2></div></div>
-          <blockquote>{activeBlock.body}</blockquote>
-          <div className="history">{activeEntries.length === 0 && <p className="muted">No edits attached yet.</p>}{activeEntries.map((entry) => <article className="entry" key={entry.id}><div><span className={`status ${entry.status}`}>{entry.status}</span><span>{entry.kind} · {entry.category}</span></div><p>{entry.body}</p><time>{new Date(entry.createdAt).toLocaleString()}</time></article>)}</div>
-          <div className="composer"><div className="selectors">
-            <label>Action<select value={kind} onChange={(e) => setKind(e.target.value as Entry["kind"])}>{kindOptions.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label>Status<select value={status} onChange={(e) => setStatus(e.target.value as Entry["status"])}>{statusOptions.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label>Category<input value={category} onChange={(e) => setCategory(e.target.value)} /></label></div>
-            <textarea value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Explain the error, add data, or write the replacement paragraph…" rows={5} />
-            <button className="save" disabled={saving || !draft.trim()} onClick={saveEntry}>{saving ? "Recording…" : "Attach token edit"}</button>
-          </div></>}
-      </aside>
-    </section>
-    <footer><span>{notice}</span><span>{entries.length} recorded token edits</span></footer>
-  </main>;
-}
+import { useEffect, useMemo, useRef, useState } from "react";
+type Block={id:string;title:string;body:string}; type Entry={id:number;blockId:string;kind:string;status:string;category:string;body:string;createdAt:string};
+const blocks:Block[]=[
+{id:"cavity-pair",title:"Paired cavity state",body:"Two boron-defined cavities form a differential logical cell. One controlled carrier is shared across the pair, while amplitude and phase encode the relationship between the cavities."},
+{id:"opposed-pulses",title:"Opposing pulse cycle",body:"Cavity A and cavity B receive phase-locked drives separated by 180 degrees. The field between them is the active region, and the pulse must preserve the stored relationship rather than force an ordinary alternating switch."},
+{id:"color-router",title:"Color-addressed routing",body:"Red routes, blue imports, yellow extracts, green connects, purple assimilates, and orange selects. Each wavelength addresses the same stored information through a different physical transition."},
+{id:"measurement-rule",title:"Measurement boundary",body:"The device remains an experimental quantum proposal until coherent phase, oscillation, and interference are measured. Synchronized classical switching is retained as the first useful hardware milestone."}];
+export default function Home(){
+const[selected,setSelected]=useState<string|null>(null),[entries,setEntries]=useState<Entry[]>([]),[draft,setDraft]=useState(""),[saving,setSaving]=useState(false);const inputRef=useRef<HTMLTextAreaElement>(null);const selectedBlock=useMemo(()=>blocks.find(b=>b.id===selected),[selected]);
+useEffect(()=>{fetch("/api/context-entries").then(r=>r.json()).then(d=>setEntries(d.entries??[])).catch(()=>{})},[]);
+useEffect(()=>{if(selected)requestAnimationFrame(()=>inputRef.current?.focus())},[selected]);
+async function send(){if(!selectedBlock||!draft.trim())return;setSaving(true);try{const r=await fetch("/api/context-entries",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({blockId:selectedBlock.id,body:draft})});const d=await r.json();if(!r.ok)throw new Error(d.error??"Unable to record");setEntries(c=>[...c,d.entry]);setDraft("")}finally{setSaving(false);requestAnimationFrame(()=>inputRef.current?.focus())}}
+function composer(block:Block){if(selected!==block.id)return null;const thread=entries.filter(e=>e.blockId===block.id);const older=thread.slice(0,-1);const latest=thread.at(-1);return <div className="inlineThread"><div className="contextChip"><span>↳</span><div><small>Replying beneath</small><strong>{block.title}</strong></div><button onClick={()=>setSelected(null)} aria-label="Return composer to bottom">×</button></div>{older.length>0&&<details className="olderTurns"><summary>Earlier branch conversation ({older.length})</summary>{older.map(e=><div className="branchTurn" key={e.id}><div className="humanTurn"><span>You</span><p>{e.body}</p></div><div className="aiTurn"><span className="aiMark">✦</span><p>Filed with this paragraph’s context.</p></div></div>)}</details>}{latest&&<div className="branchTurn latest"><div className="humanTurn"><span>You</span><p>{latest.body}</p></div><div className="aiTurn"><span className="aiMark">✦</span><div><strong>Newest context remains open</strong><p>Earlier information is preserved behind the arrow while this addition stays readable in the main flow.</p></div></div></div>}<div className="composer"><textarea ref={inputRef} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();void send()}}} placeholder="Continue this part…" rows={1}/><button onClick={send} disabled={saving||!draft.trim()} aria-label="Send">{saving?"…":"↑"}</button></div><p className="quietNote">Context, category, status, and history are filed automatically.</p></div>}
+return <main><header><button aria-label="Menu">☰</button><div><strong>Oxide computer research</strong><small>Structured conversation</small></div><button aria-label="More">•••</button></header><section className="conversation"><div className="userBubble">I want the oxide computer explained as paired cavities, magnetic pulses, and color-addressed routing.</div><div className="assistant"><div className="avatar">✦</div><div className="answer">{blocks.map(block=>{const thread=entries.filter(e=>e.blockId===block.id),latest=thread.at(-1);return <section className="answerBlock" key={block.id}><button className="contextGear" onClick={()=>{setSelected(block.id);setDraft("")}} aria-label={`Continue conversation under ${block.title}`} title="Continue here">⚙</button><h2>{block.title}</h2>{latest?<><details className="earlierText"><summary>Earlier explanation</summary><p>{block.body}</p></details><p className="newestText">{latest.body}</p></>:<p>{block.body}</p>}{thread.length>0&&selected!==block.id&&<button className="branchLabel" onClick={()=>setSelected(block.id)}>› {thread.length} saved replies</button>}{composer(block)}</section>})}</div></div>{!selected&&<div className="bottomComposer"><textarea value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Reply to ChatGPT" rows={1}/><button disabled>↑</button></div>}</section><div className="systemLine">{selected?`Composer moved under “${selectedBlock?.title}”`:"Tap a small gear to continue directly beneath any paragraph."}</div></main>}
