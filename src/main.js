@@ -13,7 +13,7 @@
  *  • All UI controls
  */
 
-import { SceneManager }    from './scene.js?v=20260903-repair1';
+import { SceneManager }    from './scene.js?v=20260903-repair2';
 import { AudioAnalyzer }   from './audioAnalyzer.js';
 import { Spectrum3D }      from './visualizers/spectrum3D.js';
 import { WaveRibbon3D }    from './visualizers/waveform3D.js';
@@ -142,12 +142,13 @@ function updateStats (freqData, timeData) {
   statsThrottle++;
   if (statsThrottle % 30 !== 0) return; // update every 30 frames
 
-  const rms    = audio.getRMS();
-  const peak   = audio.getPeakFrequency();
+  const rms    = demoMode ? Math.sqrt(timeData.reduce((sum, v) => sum + ((v / 128) - 1) ** 2, 0) / timeData.length) : audio.getRMS();
+  const peakIndex = freqData.reduce((best, v, i) => v > freqData[best] ? i : best, 0);
+  const peak   = demoMode ? peakIndex * 43.07 : audio.getPeakFrequency();
   const loud   = Math.round(rms * 100);
 
-  if (statsThrottle % 300 === 0 && audio.audioBuffer) {
-    bpm = audio.estimateBPM();
+  if (statsThrottle % 300 === 0 && (audio.audioBuffer || demoMode)) {
+    bpm = demoMode ? 120 : audio.estimateBPM();
     bpmEl.textContent = bpm;
   }
 

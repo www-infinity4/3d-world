@@ -22,6 +22,7 @@ export class SceneManager {
   _init () {
     /* ── Renderer ── */
     try {
+      if (!this._supportsWebGL()) throw new Error('WebGL is not available in this browser');
       this.renderer = new THREE.WebGLRenderer({
         canvas        : this.canvas,
         antialias     : true,
@@ -89,6 +90,15 @@ export class SceneManager {
     /* ── Resize observer ── */
     const ro = new ResizeObserver(() => this._onResize());
     ro.observe(this.canvas.parentElement);
+  }
+
+  _supportsWebGL () {
+    try {
+      const probe = document.createElement('canvas');
+      return Boolean(probe.getContext('webgl2') || probe.getContext('webgl'));
+    } catch (_) {
+      return false;
+    }
   }
 
   _createCanvasRenderer () {
