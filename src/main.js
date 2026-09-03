@@ -13,7 +13,7 @@
  *  • All UI controls
  */
 
-import { SceneManager }    from './scene.js';
+import { SceneManager }    from './scene.js?v=20260903-repair1';
 import { AudioAnalyzer }   from './audioAnalyzer.js';
 import { Spectrum3D }      from './visualizers/spectrum3D.js';
 import { WaveRibbon3D }    from './visualizers/waveform3D.js';
