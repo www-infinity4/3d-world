@@ -182,6 +182,11 @@ button {
 }
 button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 button:disabled { opacity: .35; cursor: not-allowed; }
+.primary-action {
+  width: 100%; margin-bottom: 8px; color: #fff;
+  border-color: #00aaff; background: linear-gradient(120deg, #006ee6, #8d20e8);
+  font-weight: 700;
+}
 
 /* ── Equalizer ── */
 .eq-grid {
@@ -275,6 +280,11 @@ button:disabled { opacity: .35; cursor: not-allowed; }
 }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
 #statsBox { font-size: 11px; color: rgba(255,255,255,.5); text-align: right; }
+.render-status {
+  background: rgba(8, 14, 34, .78); border: 1px solid rgba(90, 205, 255, .35);
+  color: #bceeff; padding: 5px 10px; border-radius: 14px; font-size: 11px;
+  backdrop-filter: blur(8px);
+}
 
 /* ── Info panel ── */
 .info-panel { padding: 12px; }
@@ -309,8 +319,15 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   :root { --sidebar-w: 200px; }
 }
 @media (max-width: 500px) {
-  .sidebar { display: none; }
-  .topbar-tabs { display: none; }
+  :root { --topbar-h: 92px; --sidebar-w: min(44vw, 190px); }
+  .topbar { align-items: flex-start; flex-wrap: wrap; padding: 8px; gap: 6px; }
+  .logo { width: 100%; }
+  .topbar-tabs { display: flex; overflow-x: auto; order: 3; width: 100%; }
+  .tab-btn { padding: 4px 8px; font-size: 10px; }
+  .topbar-actions { display: none; }
+  .sidebar { display: block; }
+  .info-panel { display: none !important; }
+  .panel { padding: 8px; }
 }
 
 /* ── Builder label row ── */

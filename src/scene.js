@@ -21,17 +21,28 @@ export class SceneManager {
 
   _init () {
     /* ── Renderer ── */
-    this.renderer = new THREE.WebGLRenderer({
-      canvas        : this.canvas,
-      antialias     : true,
-      alpha         : false,
-      preserveDrawingBuffer: true  // needed for PNG export
-    });
+    try {
+      this.renderer = new THREE.WebGLRenderer({
+        canvas        : this.canvas,
+        antialias     : true,
+        alpha         : false,
+        preserveDrawingBuffer: true
+      });
+      this.isFallback = false;
+    } catch (error) {
+      console.warn('WebGL is unavailable; using the World Studio canvas renderer.', error);
+      this.isFallback = true;
+      this._fallbackContext = this.canvas.getContext('2d');
+      this.renderer = this._createCanvasRenderer();
+      document.documentElement.classList.add('canvas-fallback');
+    }
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+    if (!this.isFallback) {
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+      this.renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+    }
 
     /* ── Scene ── */
     this.scene = new THREE.Scene();
@@ -48,7 +59,9 @@ export class SceneManager {
     this.camera.position.set(0, 8, 30);
 
     /* ── Controls ── */
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = this.isFallback ? {
+      enabled: true, autoRotate: true, update () {}, dispose () {}
+    } : new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping    = true;
     this.controls.dampingFactor    = 0.05;
     this.controls.autoRotate       = true;
@@ -76,6 +89,69 @@ export class SceneManager {
     /* ── Resize observer ── */
     const ro = new ResizeObserver(() => this._onResize());
     ro.observe(this.canvas.parentElement);
+  }
+
+  _createCanvasRenderer () {
+    const renderer = {
+      domElement: this.canvas,
+      shadowMap: {},
+      setPixelRatio () {},
+      setSize: (w, h) => {
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        this.canvas.width = Math.max(1, Math.floor(w * ratio));
+        this.canvas.height = Math.max(1, Math.floor(h * ratio));
+      },
+      render: () => this._renderCanvasFallback()
+    };
+    return renderer;
+  }
+
+  setFallbackData (frequency, waveform, viz, mode) {
+    this._fallbackData = { frequency, waveform, viz, mode };
+  }
+
+  _renderCanvasFallback () {
+    const ctx = this._fallbackContext;
+    if (!ctx) return;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    const data = this._fallbackData || {};
+    const freq = data.frequency || [];
+    const wave = data.waveform || [];
+    const t = performance.now() / 1000;
+    const bg = ctx.createRadialGradient(w * .52, h * .42, 0, w * .52, h * .42, Math.max(w, h) * .72);
+    bg.addColorStop(0, '#142a52'); bg.addColorStop(.48, '#090e23'); bg.addColorStop(1, '#03050d');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = 'rgba(80,170,255,.13)'; ctx.lineWidth = 1;
+    const step = Math.max(36, Math.floor(w / 18));
+    for (let x = (t * 12) % step; x < w; x += step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    for (let y = 0; y < h; y += step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+    const count = Math.min(72, freq.length || 72);
+    const barW = w / count;
+    for (let i = 0; i < count; i++) {
+      const synthetic = 70 + 52 * Math.sin(t * 2.2 + i * .24) + 24 * Math.sin(t * .7 + i * .67);
+      const value = freq.length ? freq[Math.floor(i * freq.length / count)] : synthetic;
+      const bh = Math.max(3, (value / 255) * h * .54);
+      const hue = 188 + (i / count) * 92;
+      ctx.fillStyle = `hsla(${hue}, 95%, 62%, .78)`;
+      ctx.fillRect(i * barW + 1, h - bh, Math.max(2, barW - 3), bh);
+    }
+
+    ctx.beginPath();
+    for (let i = 0; i < 180; i++) {
+      const x = i / 179 * w;
+      const source = wave.length ? (wave[Math.floor(i * wave.length / 180)] - 128) / 128 : Math.sin(i * .17 + t * 3) * .42;
+      const y = h * .38 + source * h * .18;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.strokeStyle = '#85f5ff'; ctx.lineWidth = Math.max(2, w / 700); ctx.shadowBlur = 18; ctx.shadowColor = '#00c8ff'; ctx.stroke(); ctx.shadowBlur = 0;
+
+    ctx.fillStyle = 'rgba(235,246,255,.94)'; ctx.font = `700 ${Math.max(18, w / 45)}px system-ui`;
+    ctx.fillText((data.mode || 'audio').toUpperCase() + ' · LIVE CANVAS', 26, 42);
+    ctx.fillStyle = 'rgba(190,215,240,.7)'; ctx.font = `500 ${Math.max(12, w / 85)}px system-ui`;
+    ctx.fillText('Compatible mode active — create, analyze and export without WebGL', 27, 68);
   }
 
   _onResize () {

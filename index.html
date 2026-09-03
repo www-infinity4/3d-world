@@ -66,6 +66,8 @@
         <label class="file-label" for="audioFile">📂 Load audio file</label>
         <input type="file" id="audioFile" accept="audio/*" />
 
+        <button id="demoSignalBtn" class="primary-action">✨ Start instant demo</button>
+
         <div class="control-row">
           <button id="micBtn" title="Use microphone">🎤 Mic</button>
           <button id="playBtn" disabled>▶ Play</button>
@@ -251,6 +253,7 @@
     <main class="canvas-wrap" id="canvasWrap">
       <canvas id="mainCanvas"></canvas>
       <div id="overlay">
+        <div id="renderStatus" class="render-status">Starting studio…</div>
         <div id="gifIndicator" class="hidden">⏺ Recording… <span id="gifCountdown"></span></div>
         <div id="walkIndicator" class="hidden">🚶 Walk Mode — WASD · Mouse · Esc to exit</div>
         <div id="statsBox"></div>

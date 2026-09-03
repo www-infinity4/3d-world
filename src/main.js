@@ -39,6 +39,9 @@ const canvas = document.getElementById('mainCanvas');
 const scene  = new SceneManager(canvas);
 const audio  = new AudioAnalyzer();
 scene.start();
+document.getElementById('renderStatus').textContent = scene.isFallback
+  ? 'Compatible canvas mode · all core tools ready'
+  : 'WebGL studio ready';
 
 /* ── Exporter ── */
 const exporter = new Exporter(scene.renderer, scene.scene, scene.camera);
@@ -79,13 +82,29 @@ let activeChart = null;
 let appMode = 'audio'; // audio | charts | build
 let clips   = [];
 let gifRecording = false;
+let demoMode = true;
+
+function demoData (elapsed) {
+  const frequency = new Uint8Array(256);
+  const waveform = new Uint8Array(512);
+  for (let i = 0; i < frequency.length; i++) {
+    const pulse = Math.max(0, Math.sin(elapsed * 2.4 - i * .055));
+    frequency[i] = Math.max(0, Math.min(255, 28 + pulse * 168 + Math.sin(i * .31 + elapsed) * 28));
+  }
+  for (let i = 0; i < waveform.length; i++) {
+    waveform[i] = 128 + Math.sin(i * .09 + elapsed * 4) * 55 + Math.sin(i * .021 - elapsed * 2) * 24;
+  }
+  return { frequency, waveform };
+}
 
 /* ════════════════════════════════════════════
    Animation loop callback
 ════════════════════════════════════════════ */
 scene.addAnimCallback((delta, elapsed) => {
-  const freqData = audio.getFrequencyData();
-  const timeData = audio.getWaveformData();
+  const demo = demoData(elapsed);
+  const freqData = demoMode ? demo.frequency : audio.getFrequencyData();
+  const timeData = demoMode ? demo.waveform : audio.getWaveformData();
+  scene.setFallbackData(freqData, timeData, activeViz, appMode);
 
   // Feed active visualizer
   switch (activeViz) {
@@ -195,11 +214,22 @@ document.querySelectorAll('.viz-btn').forEach(btn => {
 const playBtn  = document.getElementById('playBtn');
 const stopBtn  = document.getElementById('stopBtn');
 const sliceBtn = document.getElementById('sliceBtn');
+const demoSignalBtn = document.getElementById('demoSignalBtn');
+
+demoSignalBtn.addEventListener('click', () => {
+  demoMode = !demoMode;
+  demoSignalBtn.textContent = demoMode ? '⏸ Pause instant demo' : '✨ Start instant demo';
+  document.getElementById('renderStatus').textContent = demoMode
+    ? (scene.isFallback ? 'Compatible canvas demo running' : 'Instant signal demo running')
+    : (scene.isFallback ? 'Compatible canvas mode · ready' : 'WebGL studio ready');
+});
 
 document.getElementById('audioFile').addEventListener('change', async e => {
   const file = e.target.files[0];
   if (!file) return;
   await audio.loadFile(file);
+  demoMode = false;
+  demoSignalBtn.textContent = '✨ Start instant demo';
   playBtn.disabled  = false;
   stopBtn.disabled  = false;
   sliceBtn.disabled = false;
@@ -210,6 +240,7 @@ document.getElementById('audioFile').addEventListener('change', async e => {
 document.getElementById('micBtn').addEventListener('click', async () => {
   try {
     await audio.startMic();
+    demoMode = false;
     playBtn.disabled = true;
     stopBtn.disabled = false;
   } catch (err) {
